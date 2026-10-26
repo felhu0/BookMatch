@@ -1,6 +1,53 @@
-﻿namespace BookMatch.Api.wwwroot
-{
-    public class login
-    {
-    }
-}
+﻿<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Logga in – BookMatch</title>
+    <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+    <header>
+        <h1><a href="/">BookMatch</a></h1>
+        <p>Inloggade får fler frågor och sparad chatthistorik</p>
+    </header>
+
+    <main>
+        <!-- Inloggning -->
+        <section>
+            <h2>Logga in</h2>
+            <form id="login-form">
+                <label for="login-email">E-post</label>
+                <input id="login-email" name="email" type="email" autocomplete="username" maxlength="256" required>
+
+                <label for="login-password">Lösenord</label>
+                <input id="login-password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+
+                <button type="submit">Logga in</button>
+            </form>
+        </section>
+
+        <!-- Registrering -->
+        <section>
+            <h2>Skapa konto</h2>
+            <form id="register-form">
+                <label for="register-email">E-post</label>
+                <input id="register-email" name="email" type="email" autocomplete="username" maxlength="256" required>
+
+                <label for="register-password">Lösenord</label>
+                <input id="register-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+                <p>Minst 12 tecken. En lösenordsfras, t.ex. fyra ord, är både säker och lätt att komma ihåg.</p>
+
+                <button type="submit">Skapa konto</button>
+            </form>
+        </section>
+
+        <!-- Status (fel) läses upp av skärmläsare -->
+        <p id="status" role="status"></p>
+
+        <p><a href="/">Tillbaka till BookMatch</a></p>
+    </main>
+
+    <script type="module" src="js/login.js"></script>
+</body>
+</html>

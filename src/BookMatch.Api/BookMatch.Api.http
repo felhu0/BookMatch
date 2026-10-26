@@ -1,8 +1,9 @@
-@baseUrl = http://localhost:5237
+@baseUrl = https://localhost:7051
 
-### Boktips från formuläret (förväntat: 200 OK)
+### Boktips från formuläret (förväntat: 200 OK, text/event-stream med message-händelser och sist done)
 POST {{baseUrl}}/api/chat
 Content-Type: application/json
+Accept: text/event-stream
 
 {
   "language": "sv",
@@ -58,3 +59,64 @@ Content-Type: application/json
   "language": "sv",
   "level": "Easy"
 }
+
+### Registrera konto (förväntat: 200 OK)
+POST {{baseUrl}}/api/account/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "en lång lösenordsfras"
+}
+
+### Registrera samma e-post igen (förväntat: 400, generiskt fel)
+POST {{baseUrl}}/api/account/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "en lång lösenordsfras"
+}
+
+### För kort lösenord (förväntat: 400, PasswordTooShort)
+POST {{baseUrl}}/api/account/register
+Content-Type: application/json
+
+{
+  "email": "annan@example.com",
+  "password": "kort"
+}
+
+### Logga in (förväntat: 200 OK + Set-Cookie: BookMatch.Auth)
+POST {{baseUrl}}/api/account/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "en lång lösenordsfras"
+}
+
+### Fel lösenord (förväntat: 401, "Invalid email or password.")
+POST {{baseUrl}}/api/account/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "fel lösenord här"
+}
+
+### Vem är inloggad (förväntat: 200 om cookie skickas, annars 401)
+GET {{baseUrl}}/api/account/me
+
+### Chatt utan CSRF-token (förväntat: 400, "Invalid or missing antiforgery token.")
+POST {{baseUrl}}/api/chat
+Content-Type: application/json
+
+{
+  "language": "sv",
+  "genre": "Fantasy",
+  "level": "Easy"
+}
+
+### Hämta CSRF-token (förväntat: 200 + token + Set-Cookie: BookMatch.Antiforgery)
+GET {{baseUrl}}/api/antiforgery/token

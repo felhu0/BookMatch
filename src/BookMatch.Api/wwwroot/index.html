@@ -1,1 +1,106 @@
-﻿
+﻿<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BookMatch</title>
+    <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+    <header>
+        <h1>BookMatch</h1>
+        <p>Hitta böcker som passar dig</p>
+
+        <!-- Konto: inloggningsstatus visas av auth.js -->
+        <nav id="account">
+            <a id="login-link" href="login.html">Logga in / Skapa konto</a>
+            <span id="account-email" hidden></span>
+            <button id="logout-button" type="button" hidden>Logga ut</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Startformulär (strukturerade val, samma värden som vitlistan i backend) -->
+        <form id="start-form">
+            <label for="language">Språk</label>
+            <select id="language" name="language" required>
+                <option value="">Välj språk</option>
+                <optgroup label="Nordiska">
+                    <option value="sv">Svenska</option>
+                    <option value="no">Norska</option>
+                    <option value="da">Danska</option>
+                    <option value="fi">Finska</option>
+                </optgroup>
+                <optgroup label="Övriga europeiska">
+                    <option value="en">Engelska</option>
+                    <option value="de">Tyska</option>
+                    <option value="fr">Franska</option>
+                    <option value="es">Spanska</option>
+                    <option value="it">Italienska</option>
+                    <option value="nl">Nederländska</option>
+                    <option value="pl">Polska</option>
+                    <option value="pt">Portugisiska</option>
+                </optgroup>
+                <optgroup label="Asiatiska och övriga">
+                    <option value="zh">Kinesiska</option>
+                    <option value="ja">Japanska</option>
+                    <option value="ko">Koreanska</option>
+                    <option value="hi">Hindi</option>
+                    <option value="ar">Arabiska</option>
+                    <option value="tr">Turkiska</option>
+                </optgroup>
+            </select>
+
+            <label for="genre">Genre</label>
+            <select id="genre" name="genre" required>
+                <option value="">Välj genre</option>
+                <option value="Fantasy">Fantasy</option>
+                <option value="ScienceFiction">Science fiction</option>
+                <option value="Crime">Deckare</option>
+                <option value="Thriller">Thriller</option>
+                <option value="Romance">Romantik</option>
+                <option value="Horror">Skräck</option>
+                <option value="HistoricalFiction">Historisk roman</option>
+                <option value="Classics">Klassiker</option>
+                <option value="Biography">Biografi</option>
+                <option value="NonFiction">Facklitteratur</option>
+            </select>
+
+            <label for="level">Läsnivå</label>
+            <select id="level" name="level" required>
+                <option value="">Välj läsnivå</option>
+                <option value="Easy">Lätt</option>
+                <option value="Medium">Medel</option>
+                <option value="Advanced">Avancerad</option>
+            </select>
+
+            <button type="submit">Hitta böcker</button>
+        </form>
+
+        <!-- Chattvy, visas när chatten har startat -->
+        <section id="chat" hidden>
+            <!-- Meddelandelista, dir="auto" sätts per meddelande så arabiska visas höger till vänster -->
+            <ul id="messages" aria-live="polite"></ul>
+
+            <!-- Status (laddar/fel) läses upp av skärmläsare -->
+            <p id="status" role="status"></p>
+
+            <!-- Följdfrågor -->
+            <form id="follow-up-form">
+                <label for="follow-up">Följdfråga</label>
+                <input id="follow-up" name="message" type="text" maxlength="500" autocomplete="off"
+                       placeholder="T.ex. Hur togs den första boken emot?" disabled>
+                <button type="submit" disabled>Skicka</button>
+            </form>
+        </section>
+
+        <!-- Varning om AI-fel och personuppgifter (GDPR, General Data Protection Regulation) -->
+        <p class="notice">
+            Boktipsen genereras av AI och kan innehålla fel.
+            Skriv inga personuppgifter – meddelanden skickas till Google Gemini.
+        </p>
+    </main>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/chat.js"></script>
+</body>
+</html>
