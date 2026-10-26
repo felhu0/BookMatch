@@ -4,4 +4,6 @@
 public record ChatRequest(
     string Language,    // språkkod enligt ISO 639-1 (tvåbokstavskod, t.ex. "sv")
     Genre Genre,
-    ReadingLevel Level);
+    ReadingLevel Level,
+    IReadOnlyList<ChatMessageDto>? History = null,
+    string? Message = null);
