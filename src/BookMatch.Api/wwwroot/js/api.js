@@ -112,6 +112,7 @@ function parseEvent(rawEvent) {
 function getErrorMessage(status) {
     switch (status) {
         case 400: return "Ogiltiga val. Ladda om sidan och försök igen.";
+        case 429: return "Du har nått gränsen för antal frågor. Försök igen om en stund – inloggade användare får fler frågor.";
         case 502: return "AI-tjänsten är inte tillgänglig just nu.";
         case 503: return "AI-tjänsten är upptagen. Försök igen om en stund.";
         default: return "Något gick fel. Försök igen.";
@@ -130,6 +131,12 @@ function getStreamErrorMessage(code) {
 // Registrerar konto och loggar in direkt
 export async function register(email, password) {
     const response = await postAccount("register", { email, password });
+
+    // För många försök från samma nätverk (rate limiting per IP-adress)
+    if (response.status === 429) {
+        throw new Error("För många försök. Vänta en stund och försök igen.");
+    }
+
     if (!response.ok) {
         throw new Error(await getRegisterErrorMessage(response));
     }
@@ -141,6 +148,11 @@ export async function register(email, password) {
 // Loggar in
 export async function login(email, password) {
     const response = await postAccount("login", { email, password });
+
+    // För många försök från samma nätverk (rate limiting per IP-adress)
+    if (response.status === 429) {
+        throw new Error("För många försök. Vänta en stund och försök igen.");
+    }
 
     if (!response.ok) {
         // Samma meddelande oavsett orsak (avslöjar inte vilka konton som finns)

@@ -11,6 +11,9 @@ builder.Services.AddDatabase(builder.Configuration);
 
 builder.Services.AddAuth();
 
+// Rate limiting (begränsning av antal anrop) i två nivåer
+builder.Services.AddRateLimits();
+
 // Enum som text i JSON (JavaScript Object Notation), siffror tillåts inte
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -38,6 +41,9 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Rate limiting: efter inloggning, så att inloggade känns igen och får sin egen gräns
+app.UseRateLimiter();
 
 app.MapAntiforgeryEndpoints();
 app.MapChatEndpoints();

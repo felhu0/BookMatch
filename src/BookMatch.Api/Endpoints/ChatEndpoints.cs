@@ -1,4 +1,5 @@
-﻿using BookMatch.Api.Models;
+﻿using BookMatch.Api.Extensions;
+using BookMatch.Api.Models;
 using BookMatch.Api.Services;
 using BookMatch.Api.Validation;
 using System.ClientModel;
@@ -51,7 +52,9 @@ public static class ChatEndpoints
             }
 
             return Results.Empty;
-        }).AddEndpointFilter<AntiforgeryFilter>();
+        })
+        .AddEndpointFilter<AntiforgeryFilter>()
+        .RequireRateLimiting(RateLimitingExtensions.ChatPolicy);
 
         return app;
     }
