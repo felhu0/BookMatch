@@ -35,6 +35,8 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseHttpsRedirection();
 
+app.UseSecurityHeaders();
+
 // Frontend: visar index.html, filer i wwwroot serveras
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -45,9 +47,11 @@ app.UseAuthorization();
 // Rate limiting: efter inloggning, så att inloggade känns igen och får sin egen gräns
 app.UseRateLimiter();
 
+// Endpoints
 app.MapAntiforgeryEndpoints();
 app.MapChatEndpoints();
 app.MapAccountEndpoints();
+app.MapHistoryEndpoints();
 
 app.Run();
 

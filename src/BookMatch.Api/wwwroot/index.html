@@ -16,6 +16,7 @@
             <a id="login-link" href="login.html">Logga in / Skapa konto</a>
             <span id="account-email" hidden></span>
             <button id="logout-button" type="button" hidden>Logga ut</button>
+            <button id="delete-history-button" type="button" hidden>Radera sparad chatt</button>
         </nav>
     </header>
 
@@ -92,6 +93,9 @@
                        placeholder="T.ex. Hur togs den första boken emot?" disabled>
                 <button type="submit" disabled>Skicka</button>
             </form>
+
+            <!-- Ny sökning: nollställer chatten och historiken -->
+            <button id="new-search" type="button">Ny sökning</button>
         </section>
 
         <!-- Varning om AI-fel och personuppgifter (GDPR, General Data Protection Regulation) -->

@@ -218,3 +218,40 @@ async function getRegisterErrorMessage(response) {
     // Upptagen e-post och övriga fel ger samma meddelande
     return "Kontot kunde inte skapas. Kontrollera uppgifterna och försök igen.";
 }
+
+// Hämtar inloggad användares sparade konversation, null om ingen finns eller om användaren inte är inloggad
+export async function loadHistory() {
+    try {
+        const response = await fetch("/api/history");
+
+        // 204 = ingen sparad konversation, 401 = ej inloggad
+        if (response.status !== 200) {
+            return null;
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+// Raderar inloggad användares sparade konversation
+export async function deleteHistory() {
+    const token = await getCsrfToken();
+    let response;
+
+    try {
+        response = await fetch("/api/history", {
+            method: "DELETE",
+            headers: { "X-CSRF-TOKEN": token }
+        });
+    } catch (error) {
+        console.error(error);
+        throw new Error("Kunde inte nå servern. Kontrollera din anslutning.");
+    }
+
+    if (!response.ok) {
+        throw new Error("Den sparade chatten kunde inte raderas. Försök igen.");
+    }
+}

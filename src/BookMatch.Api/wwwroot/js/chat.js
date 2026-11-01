@@ -1,4 +1,4 @@
-﻿import { streamChat } from "./api.js";
+﻿import { streamChat, loadHistory } from "./api.js";
 
 // Kopplar ihop formuläret och följdfrågorna med API:t och visar meddelanden i chattvyn – alltid som text, aldrig som HTML
 
@@ -13,6 +13,7 @@ const status = document.getElementById("status");
 const followUpForm = document.getElementById("follow-up-form");
 const followUpInput = document.getElementById("follow-up");
 const followUpButton = followUpForm.querySelector("button");
+const newSearchButton = document.getElementById("new-search");
 
 // Formulärets val (skickas med varje anrop, servern bygger om första meddelandet från dem)
 let choices = null;
@@ -79,6 +80,20 @@ followUpForm.addEventListener("submit", async (event) => {
     followUpInput.focus();
 });
 
+// Ny sökning: tömmer chattvyn och historiken och visar formuläret igen
+newSearchButton.addEventListener("click", () => {
+    choices = null;
+    history = [];
+    messages.replaceChildren();
+    setStatus("");
+    setFollowUpEnabled(false);
+    chat.hidden = true;
+    startForm.hidden = false;
+});
+
+// Återställ inloggad användares sparade konversation när sidan laddas
+await restoreSavedConversation();
+
 // Skickar anropet, strömmar in svaret och returnerar hela svarstexten (null vid fel)
 async function sendAndShow(request) {
     setStatus("Hämtar svar...");
@@ -97,6 +112,33 @@ async function sendAndShow(request) {
         replyItem.remove();
         return null;
     }
+}
+
+// Återställer den sparade konversationen: formulärets val, meddelanden och historik
+async function restoreSavedConversation() {
+    const saved = await loadHistory();
+    if (saved === null || saved.history.length === 0) {
+        return;
+    }
+
+    // Formulärets val sätts så att describeChoices visar rätt svenska text
+    startForm.language.value = saved.language;
+    startForm.genre.value = saved.genre;
+    startForm.level.value = saved.level;
+
+    choices = { language: saved.language, genre: saved.genre, level: saved.level };
+    history = [...saved.history];
+
+    // Visa konversationen som den såg ut
+    addMessage("user", describeChoices());
+    for (const message of saved.history) {
+        addMessage(message.role === "Assistant" ? "assistant" : "user", message.content);
+    }
+
+    startForm.hidden = true;
+    chat.hidden = false;
+    setFollowUpEnabled(true);
+    setStatus("Din senaste chatt har återställts.");
 }
 
 // Lägger till ett meddelande i historiken, AI-svar kortas till serverns maxlängd
@@ -140,3 +182,4 @@ function setFollowUpEnabled(enabled) {
 function setStatus(text) {
     status.textContent = text;
 }
+

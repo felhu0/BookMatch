@@ -1,4 +1,5 @@
 ﻿using BookMatch.Api.Data;
+using BookMatch.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookMatch.Api.Extensions;
@@ -11,6 +12,8 @@ public static class DataExtensions
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is missing.");
 
         services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+
+        services.AddScoped<IConversationService, ConversationService>();
 
         return services;
     }
