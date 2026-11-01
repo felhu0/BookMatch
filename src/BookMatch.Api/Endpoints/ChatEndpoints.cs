@@ -1,7 +1,10 @@
-﻿using BookMatch.Api.Models;
+﻿using BookMatch.Api.Extensions;
+using BookMatch.Api.Models;
 using BookMatch.Api.Services;
 using BookMatch.Api.Validation;
 using System.ClientModel;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 
 namespace BookMatch.Api.Endpoints;
@@ -13,6 +16,9 @@ public static class ChatEndpoints
         app.MapPost("/api/chat", async (
             ChatRequest request,
             IChatService chatService,
+            IConversationService conversationService,
+            ClaimsPrincipal user,
+            ILoggerFactory loggerFactory,
             HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
@@ -28,13 +34,31 @@ public static class ChatEndpoints
             response.ContentType = "text/event-stream"; //Markerar svaret som en SSE-ström
             response.Headers.CacheControl = "no-cache"; //Förhindrar cachning och buffring
 
+            // Hela svaret samlas ihop för att kunna sparas
+            var reply = new StringBuilder();
+
             try
             {
                 await foreach (var text in chatService.StreamReplyAsync(request, cancellationToken))
                 {
+                    reply.Append(text);
                     await WriteEventAsync(response, "message", new { text }, cancellationToken);
                 }
 
+                // Spara konversationen för inloggade 
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId is not null)
+                {
+                    try
+                    {
+                        await conversationService.SaveAsync(userId, request, reply.ToString(), cancellationToken);
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        // Svaret ska ändå visas, och meddelandenas innehåll loggas aldrig
+                        loggerFactory.CreateLogger("ChatEndpoints").LogError(ex, "Failed to save conversation.");
+                    }
+                }
                 // Signal till frontend att svaret är klart
                 await WriteEventAsync(response, "done", new { }, cancellationToken);
             }
@@ -51,7 +75,9 @@ public static class ChatEndpoints
             }
 
             return Results.Empty;
-        }).AddEndpointFilter<AntiforgeryFilter>();
+        })
+        .AddEndpointFilter<AntiforgeryFilter>()
+        .RequireRateLimiting(RateLimitingExtensions.ChatPolicy);
 
         return app;
     }

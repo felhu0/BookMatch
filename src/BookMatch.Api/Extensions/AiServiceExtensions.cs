@@ -28,6 +28,8 @@ public static class AiServiceExtensions
         // AI-klient (IChatClient): gemensamt interface, leverantören kan bytas här utan att ändra resten av koden
         services.AddChatClient(openAiClient.GetChatClient(model).AsIChatClient());
 
+        services.AddSingleton<IPromptBuilder, PromptBuilder>();
+
         // Chatt-tjänst, en ny instans per HTTP-anrop
         services.AddScoped<IChatService, ChatService>();
 

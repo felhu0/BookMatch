@@ -1,4 +1,5 @@
-﻿using BookMatch.Api.Models;
+﻿using BookMatch.Api.Extensions;
+using BookMatch.Api.Models;
 using BookMatch.Api.Validation;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
@@ -45,7 +46,7 @@ public static class AccountEndpoints
 
             await signInManager.SignInAsync(user, isPersistent: true);
             return Results.Ok(new { email = user.Email });
-        });
+        }).RequireRateLimiting(RateLimitingExtensions.AccountPolicy);
 
         // Logga in, lockout räknar felaktiga försök
         group.MapPost("/login", async (CredentialsRequest request, SignInManager<AppUser> signInManager) =>
@@ -75,7 +76,7 @@ public static class AccountEndpoints
             }
 
             return Results.Ok(new { eamil = request.Email });
-        });
+        }).RequireRateLimiting(RateLimitingExtensions.AccountPolicy);
 
         group.MapPost("/logout", async (SignInManager<AppUser> signInManager) =>
         {

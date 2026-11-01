@@ -1,6 +1,6 @@
 ﻿// Logik för inloggningssidan: skickar formulären och går tillbaka till chatten vid lyckad inloggning
 
-import { register } from "./api.js";
+import { login, register } from "./api.js";
 
 const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("register-form");

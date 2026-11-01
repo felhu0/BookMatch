@@ -1,3 +1,272 @@
-﻿.message {
-    white-space: pre-wrap;
+﻿/* BookMatch – enkel och tydlig design */
+
+/* Färger och mått (CSS-variabler: ändras på ett ställe) */
+:root {
+    --color-bg: #f7f5f2;
+    --color-surface: #ffffff;
+    --color-text: #1f2328;
+    --color-muted: #5f6670;
+    --color-primary: #2f5d50;
+    --color-primary-hover: #244a40;
+    --color-user: #e3efe9;
+    --color-border: #ddd8d0;
+    --radius: 12px;
+    --space: 1rem;
+    --max-width: 760px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    color-scheme: light dark;
+}
+
+/* Mörkt läge (följer användarens inställning i operativsystemet) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-bg: #16181b;
+        --color-surface: #1f2226;
+        --color-text: #e8e6e3;
+        --color-muted: #a3a9b0;
+        --color-primary: #6fb39c;
+        --color-primary-hover: #86c4af;
+        --color-user: #24382f;
+        --color-border: #33373d;
+    }
+}
+
+/* hidden-attributet ska alltid dölja, även element som får display nedan */
+[hidden] {
+    display: none !important;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+a {
+    color: var(--color-primary);
+}
+
+/* Header och main centreras med maxbredd */
+header,
+main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space);
+}
+
+/* Header: rubrik och kontorad på samma rad, undertext under */
+header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem var(--space);
+    border-bottom: 1px solid var(--color-border);
+}
+
+    header h1 {
+        margin: 0;
+        font-size: 1.75rem;
+    }
+
+        header h1 a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+    header p {
+        order: 3;
+        flex-basis: 100%;
+        margin: 0;
+        color: var(--color-muted);
+    }
+
+/* Kontorad (inloggningsstatus) */
+#account {
+    order: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+#account-email {
+    color: var(--color-muted);
+}
+
+/* Kort: formulär och sektioner får vit bakgrund, ram och rundade hörn */
+#start-form,
+section {
+    margin-top: var(--space);
+    padding: calc(var(--space) * 1.25);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+}
+
+    section h2 {
+        margin-top: 0;
+    }
+
+/* Formulär: fälten staplas under varandra */
+form {
+    display: grid;
+    gap: 0.5rem;
+}
+
+label {
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+select,
+input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font: inherit;
+    color: inherit;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+/* Hjälptext under fält (t.ex. lösenordskrav) */
+form p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+}
+
+/* Knappar */
+button {
+    padding: 0.6rem 1.1rem;
+    font: inherit;
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--color-primary);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+    button:hover:not(:disabled) {
+        background: var(--color-primary-hover);
+    }
+
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+form button {
+    justify-self: start;
+    margin-top: 0.5rem;
+}
+
+/* Sekundära knappar (konto och ny sökning): kantlinje istället för fylld bakgrund */
+#account button,
+#new-search {
+    padding: 0.35rem 0.8rem;
+    color: var(--color-primary);
+    background: transparent;
+    border: 1px solid var(--color-primary);
+}
+
+    #account button:hover,
+    #new-search:hover {
+        background: var(--color-user);
+    }
+
+/* Fokus syns tydligt vid tangentbordsnavigering (tillgänglighet) */
+:focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Chattvy: meddelanden som pratbubblor */
+#messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.message {
+    max-width: 85%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    white-space: pre-wrap; /* radbrytningar i svaren visas */
+    overflow-wrap: anywhere; /* långa ord och länkar bryts istället för att gå utanför */
+}
+
+/* Användarens meddelanden till höger */
+.message-user {
+    align-self: flex-end;
+    background: var(--color-user);
+    border-bottom-right-radius: 4px;
+}
+
+/* AI:ns meddelanden till vänster */
+.message-assistant {
+    align-self: flex-start;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-bottom-left-radius: 4px;
+}
+
+    /* Tom AI-bubbla medan svaret hämtas visar tre punkter */
+    .message-assistant:empty::after {
+        content: "…";
+        color: var(--color-muted);
+    }
+
+/* Status (laddar, fel, återställd chatt) */
+#status {
+    min-height: 1.5em;
+    margin: 0.75rem 0;
+    color: var(--color-muted);
+}
+
+/* Följdfråga: fält och knapp på samma rad */
+#follow-up-form {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+}
+
+    #follow-up-form label {
+        grid-column: 1 / -1;
+    }
+
+    #follow-up-form button {
+        margin-top: 0;
+    }
+
+#new-search {
+    margin-top: var(--space);
+}
+
+/* Varning om AI och personuppgifter */
+.notice {
+    margin-top: calc(var(--space) * 1.5);
+    font-size: 0.85rem;
+    color: var(--color-muted);
+}
+
+/* Mobil: bredare bubblor och följdfrågans knapp under fältet */
+@media (max-width: 480px) {
+    .message {
+        max-width: 100%;
+    }
+
+    #follow-up-form {
+        grid-template-columns: 1fr;
+    }
 }
