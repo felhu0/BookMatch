@@ -14,6 +14,7 @@ const followUpForm = document.getElementById("follow-up-form");
 const followUpInput = document.getElementById("follow-up");
 const followUpButton = followUpForm.querySelector("button");
 const newSearchButton = document.getElementById("new-search");
+const suggestions = document.getElementById("suggestions");
 
 // Formulärets val (skickas med varje anrop, servern bygger om första meddelandet från dem)
 let choices = null;
@@ -53,31 +54,16 @@ startForm.addEventListener("submit", async (event) => {
 // Följdfrågor: fritext från användaren
 followUpForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    await sendFollowUp(followUpInput.value.trim());
+});
 
-    const message = followUpInput.value.trim();
-    if (message === "") {
+// Förslag: klick på en knapp skickar dess text som användarens meddelande
+suggestions.addEventListener("click", async (event) => {
+    const button = event.target.closest("button[data-message]");
+    if (button === null || button.disabled) {
         return;
     }
-
-    // Förhindra dubbelklick medan svaret strömmar
-    setFollowUpEnabled(false);
-    followUpInput.value = "";
-    trimHistory();
-
-    const userItem = addMessage("user", message);
-    const reply = await sendAndShow({ ...choices, history, message });
-
-    if (reply === null) {
-        // Ta bort frågan och lägg tillbaka texten så användaren kan försöka igen
-        userItem.remove();
-        followUpInput.value = message;
-    } else {
-        addToHistory("User", message);
-        addToHistory("Assistant", reply);
-    }
-
-    setFollowUpEnabled(true);
-    followUpInput.focus();
+    await sendFollowUp(button.dataset.message);
 });
 
 // Ny sökning: tömmer chattvyn och historiken och visar formuläret igen
@@ -87,6 +73,7 @@ newSearchButton.addEventListener("click", () => {
     messages.replaceChildren();
     setStatus("");
     setFollowUpEnabled(false);
+    suggestions.hidden = true;
     chat.hidden = true;
     startForm.hidden = false;
 });
@@ -112,6 +99,33 @@ async function sendAndShow(request) {
         replyItem.remove();
         return null;
     }
+}
+
+// Skickar en följdfråga (skriven eller vald förslag), strömmar svaret och uppdaterar historiken
+async function sendFollowUp(message) {
+    if (message === "") {
+        return;
+    }
+
+    // Förhindra dubbelklick medan svaret strömmar
+    setFollowUpEnabled(false);
+    followUpInput.value = "";
+    trimHistory();
+
+    const userItem = addMessage("user", message);
+    const reply = await sendAndShow({ ...choices, history, message });
+
+    if (reply === null) {
+        // Ta bort frågan och lägg tillbaka texten så användaren kan försöka igen
+        userItem.remove();
+        followUpInput.value = message;
+    } else {
+        addToHistory("User", message);
+        addToHistory("Assistant", reply);
+    }
+
+    setFollowUpEnabled(true);
+    followUpInput.focus();
 }
 
 // Återställer den sparade konversationen: formulärets val, meddelanden och historik
@@ -173,10 +187,19 @@ function describeChoices() {
     return `${language} · ${genre} · ${level}`;
 }
 
-// Aktiverar eller inaktiverar fältet och knappen för följdfrågor
+// Aktiverar eller inaktiverar fältet, knappen och förslagen för följdfrågor
 function setFollowUpEnabled(enabled) {
     followUpInput.disabled = !enabled;
     followUpButton.disabled = !enabled;
+
+    for (const button of suggestions.querySelectorAll("button")) {
+        button.disabled = !enabled;
+    }
+
+    // Förslagen visas när det finns ett svar, och ligger kvar (inaktiva) medan nästa svar strömmar
+    if (enabled) {
+        suggestions.hidden = false;
+    }
 }
 
 function setStatus(text) {

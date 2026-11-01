@@ -86,6 +86,13 @@
             <!-- Status (laddar/fel) läses upp av skärmläsare -->
             <p id="status" role="status"></p>
 
+            <!-- Förslag på följdfrågor: visas efter första svaret, texten i data-message skickas som användarens meddelande -->
+            <div id="suggestions" class="suggestions" aria-label="Förslag på följdfrågor" hidden>
+                <button type="button" data-message="Ge mig fler böcker av samma författare som den första boken.">Fler av samma författare</button>
+                <button type="button" data-message="Ge mig fler böcker i samma genre och på samma nivå.">Fler i samma genre</button>
+                <button type="button" data-message="Hur har böckerna tagits emot av läsare och kritiker?">Hur togs böckerna emot?</button>
+            </div>
+
             <!-- Följdfrågor -->
             <form id="follow-up-form">
                 <label for="follow-up">Följdfråga</label>
