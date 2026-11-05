@@ -101,7 +101,7 @@ dotnet test
 
 - **Enhetstester** för validering, prompt-byggaren (roller, avgränsning och påminnelser) och behörighet för sparad historik
 - **Attacklista** med 12 prompt injection-attacker och 16 webbsäkerhetstester – se [`docs/tester/attacklist.md.txt`](docs/tests/attacklist.md.txt)
-- **Hallucinationstester** med frågor om påhittade böcker och kontroll av boktips mot en annan AI, Libris och Open Library – se [`docs/tester/hallucinationstests.md.txt`](docs/tests/hallucinationstests.md.txt)
+- **Hallucinationstester** med frågor om påhittade böcker och kontroll av boktips mot en annan AI, Libris och Open Library – se [`docs/tests/hallucinationtests.md.txt`](docs/tests/hallucinationtests.md.txt)
 
 ## Begränsningar
 
