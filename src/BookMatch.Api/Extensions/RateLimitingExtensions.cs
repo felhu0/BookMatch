@@ -46,16 +46,16 @@ public static class RateLimitingExtensions
             // OnRejected körs när någon har gjort för många anrop inom 15 minuter
             options.OnRejected = async (context, cancellationToken) =>
             {
-                // Väntetid tills nästa segmentbyte (högst 5 minuter: fönstret på 15 minuter är delat i 3 segment)
-                // Om rate limitern kan säga hur länge användaren behöver vänta, spara väntetiden i retryAfter
+                // Frågar om rate limitern har en väntetid (Retry-After). Glidande fönster i .NET ger ingen, så TryGetMetadata returnerar false
+                // och blocket hoppas över – hellre ingen väntetid än en felaktig (0 skulle betyda "försök igen direkt")
                 if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
                 {
-                    // Lägger väntetiden i Retry-After-headern som hela sekunder i text, t.ex. "299"
-                    //om TryGetMetadata returnerar false körs den raden inte alls
+                    // Körs bara om en väntetid finns, t.ex. om en annan typ av rate limiter används i framtiden
                     context.HttpContext.Response.Headers.RetryAfter =
                         ((int)retryAfter.TotalSeconds).ToString(CultureInfo.InvariantCulture);
                 }
 
+                // Felsvar i samma format (ProblemDetails) som resten av API:t, utan interna detaljer
                 await Results.Problem(
                     detail: "Too many requests. Please try again later.",
                     statusCode: StatusCodes.Status429TooManyRequests)

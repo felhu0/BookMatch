@@ -120,3 +120,6 @@ Content-Type: application/json
 
 ### Hämta CSRF-token (förväntat: 200 + token + Set-Cookie: BookMatch.Antiforgery)
 GET {{baseUrl}}/api/antiforgery/token
+
+### Historik utan inloggning (förväntat: 401)
+GET {{baseUrl}}/api/history
