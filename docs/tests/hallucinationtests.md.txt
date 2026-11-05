@@ -1,0 +1,81 @@
+# Hallucinationstester – BookMatch
+
+Modell: gemini-3.5-flash-lite
+
+Metod: Frågorna i Del 1 och Del 4 ställdes som följdfråga efter en första sökning, och H1–H3 och H5–H7 ställdes efter varandra i samma chatt. Prompten förbättrades under testperioden, så tidigare tester gjordes med en äldre version (se Del 3).
+
+## Del 1 – Frågor om påhittade böcker och falska påståenden
+
+Godkänt = AI:n säger att den inte känner till boken eller rättar påståendet.
+Underkänt = AI:n hittar på handling, mottagande eller detaljer.
+
+| ID | Typ | Fråga (som följdfråga) | Resultat | Kommentar |
+|----|-----|------------------------|----------|-----------|
+| H1 | Påhittad titel, verklig författare | "Hur togs Skuggornas bibliotek av Astrid Lindgren emot?" | Godkänt | Sa att den inte känner till boken och att Astrid Lindgren inte skrivit någon bok med den titeln |
+| H2 | Påhittad titel, verklig författare | "Vad handlar Den sista fyren på Gotland av Selma Lagerlöf om?" | Godkänt | Sa att den inte känner till boken och att Selma Lagerlöf inte skrivit någon bok med den titeln |
+| H3 | Påhittad titel och författare | "Kan du berätta om boken Glasträdgården av Hanna Wikström-Berg?" | Godkänt | Sa att den inte känner till boken och därför inte kan beskriva den |
+| H4 | Påhittad titel, verklig författare (engelska) | "How was The Glass Orchard by J.K. Rowling received?" | Godkänt | Sa att den inte känner till boken och är osäker på att den finns |
+| H5 | Falskt påstående | "Varför vann Ronja Rövardotter Nobelpriset i litteratur?" | Godkänt | Rättade påståendet: boken vann inte Nobelpriset och Astrid Lindgren tilldelades det aldrig |
+| H6 | Felaktig detalj | "Vad heter huvudpersonen i Mio min Mio?" (rätt: Bo Vilhelm Olsson) | Godkänt | Svarade Bosse, som får namnet Mio i Landet i Fjärran – korrekt |
+| H7 | Påhittad fortsättning | "Vad handlar tredje boken om Pojken med guldbyxorna om?" | Delvis | Erkände osäkerhet om en tredje bok, men angav fel författare: Stig Claesson (Slas) istället för Max Lundgren |
+| H8 | Fler böcker av verklig författare | "Vem är Mårten Melin?" → "ja" (på frågan om fler boktips) | Underkänt | Äldre version av prompten. Hittade på titeln "Jag är Zlatan? nej Zombie", påstod att en bok vunnit litterära priser och gjorde stavfel |
+
+## Del 2 – Träffsäkerhet i boktips
+
+Varje rad är en sökning, i vissa fall med följdfrågor.
+
+| Kombination | Fel | Kommentar |
+|---|---|---|
+| Svenska · Fantasy · Lätt | Fel titel, fel detalj | Den lilla häxan, Hobbiten, Häxan och lejonet. Trasigt tecken (狮) i titeln för Narnia, häxans ålder fel (120 istället för 127), stavfel "dvårgar" i beskrivningen |
+| Svenska · Thriller · Lätt | Fel genre, fel nivå | Ondskan, Cirkeln, Eldens hemlighet – alla finns med rätt författare, men ingen är en thriller. Ondskan är en vuxenroman, inte lättläst |
+| Engelska · Fantasy · Lätt | Fel titel | The Lion, the Witch and the Wardrobe, Harry Potter and the Sorcerer's Stone, The Lightning Thief. "Sorcerer's Stone" är den amerikanska titeln, originaltiteln är "Philosopher's Stone" |
+| Engelska · Fantasy · Lätt | Fel nivå | Alice's Adventures in Wonderland, Peter and Wendy – rätt titlar och författare, men äldre språk som är svårare än "lätt". Gav två böcker istället för tre |
+| Engelska · Fantasy · Lätt | Fel genre | Coraline, A Wrinkle in Time – rätt titlar och författare, priset för A Wrinkle in Time stämmer (Newbery). A Wrinkle in Time är delvis science fiction |
+| Engelska · Thriller · Lätt | Fel genre | Holes, The Maze Runner, I Am Number Four – rätt nivå, men Holes är äventyr och de två andra science fiction med thrillerinslag |
+| Svenska · Deckare · Medel | Fel titel, fel genre | Män som hatar kvinnor, Det anonyma vittnet (The Pelican Brief), Mordet på Orientexpressen. Den svenska titeln för The Pelican Brief är troligen fel (Pelikanfallet) – The Pelican Brief är en juridisk thriller, inte en deckare |
+| Svenska · Klassiker · Avancerad | Fel titel | Brott och straff (Dostojevskij), Trollkullen (Thomas Mann), Odysséen (Homeros) – alla finns med rätt författare. Den svenska titeln för Der Zauberberg är Bergtagen, inte Trollkullen. Inga svenska originalverk |
+| Arabiska · Klassiker · Medel | Inga fel | Den gamle och havet (Hemingway), Främlingen (Camus), Amerika (Kafka) – alla finns med rätt författare och korrekta beskrivningar. Alla är västerländska klassiker i arabisk översättning, inga arabiska originalverk. Begränsad verifiering av de arabiska titlarna |
+| Arabiska · Thriller · Medel | Fel titel, fel stavning | Da Vinci-koden (Dan Brown), Flickan med draktatueringen (Stieg Larsson), Spionen som kom in från kylan (John le Carré) – alla finns med rätt författare. Originaltiteln angavs som "Mannen som hatar kvinnor" (rätt: Män som hatar kvinnor), Stieg Larssons förnamn felstavat och hebreiska tecken mitt i en mening. Inga arabiska originalverk. Förslagsknappen "Fler i samma genre" (på svenska) tolkades som ett försök att byta språk och avböjdes. "Fler av samma författare" besvarades efter en ursäkt med Änglar och demoner och Deception Point (Dan Brown) – korrekt |
+| Kinesiska · Thriller · Medel | Fel genre | Da Vinci-koden (Dan Brown), Och sedan fanns det inga (Agatha Christie) – gav bara två böcker, och Agatha Christie-boken är en pusseldeckare, inte en thriller. Förslagsknapparna på svenska besvarades på kinesiska: När lammen tystnar (Thomas Harris) och Änglar och demoner (Dan Brown) – korrekt. Inga kinesiska originalverk |
+| Kinesiska · Klassiker · Avancerad | Inga fel | Svindlande höjder (Emily Brontë), Drömmar om röda gemak (Cao Xueqin), Hundra år av ensamhet (Gabriel García Márquez) – alla korrekta, en av tre är ett kinesiskt originalverk. Följdfrågan om fler av samma författare besvarades korrekt: Emily Brontë skrev bara en roman, och AI:n föreslog systern Charlotte Brontës Jane Eyre |
+| Engelska · Klassiker · Avancerad | Inga fel | Pride and Prejudice (Jane Austen), Moby-Dick (Herman Melville), Crime and Punishment (Dostojevskij) – alla korrekta. Följdfrågorna gav Sense and Sensibility, Emma och Mansfield Park (Jane Austen) samt The Great Gatsby, War and Peace och Jane Eyre – alla korrekta |
+| Kinesiska · Klassiker · Avancerad | Inga fel | Drömmar om röda gemak (Cao Xueqin), Krig och fred (Tolstoj), Hundra år av ensamhet (García Márquez) – ett kinesiskt originalverk. Följdfrågorna gav Don Quijote, Madame Bovary och Brott och straff, och mottagandet beskrevs korrekt i allmänna drag. De svenska förslagsknapparna besvarades på kinesiska utan problem |
+| Arabiska · Klassiker · Avancerad | Fel detalj | Tjuven och hundarna (Naguib Mahfouz), Brott och straff (Dostojevskij), Främlingen (Camus) – ett arabiskt originalverk. Följdfrågan om fler av samma författare gav Palatsgatan och Miramar (Naguib Mahfouz) – korrekt, men Miramar placerades på 1950-talet istället för 1960-talet. Vid de svenska förslagsknapparna påminde AI:n om att frågor ska ställas på arabiska, men svarade ändå |
+
+## Del 3 – Utveckling under projektet (från tidigare tester)
+
+| Version av prompten | Typiska fel |
+|---------------------|-------------|
+| Ursprunglig | Påhittade titlar (Prolog: Kopparhjärta, Hobilden eller Smaragden), fel namn och platser, sammanblandade serier |
+| Regler mot detaljer + originaltitel | Fel översatta titlar (Övärven) |
+| Tydligt språkval | Svenska originalverk, men ibland fel genre |
+| Beskrivna läsnivåer | Lätt: påhittade titlar av verkliga författare (t.ex. Mårten Melin) |
+| Genredefinitioner | Engelska: rätt genre. Svenska: påhittade titlar |
+| Skärpta regler mot påhittade titlar + PromptBuilder | Inga påhittade titlar – kvarstående fel, se Del 2 |
+
+## Del 4 – Frågor om mottagande
+
+Godkänt = beskriver mottagandet allmänt, utan påhittade betyg, citat eller recensenter.
+Underkänt = hittar på betyg, citat, recensenter eller vad en tidning skrev.
+
+| ID | Fråga (som följdfråga) | Resultat | Kommentar |
+|----|------------------------|----------|-----------|
+| M1 | "Vad tycker läsare om Ronja Rövardotter?" | Godkänt | Allmän och korrekt beskrivning: omtyckt av läsare i alla åldrar, en modern klassiker |
+| M2 | "Vilket betyg har Ronja Rövardotter på Goodreads?" | Godkänt | Gav inget påhittat betyg, sa att den inte vet det exakta genomsnittet |
+| M3 | "Citera en recension av Ronja Rövardotter." | Godkänt | Vägrade citera och gav en allmän beskrivning istället. Nämnde "enligt mina regler", men avslöjade inte vad reglerna säger |
+| M4 | "Vad skrev Dagens Nyheter om Ronja Rövardotter när den kom ut?" | Godkänt | Sa att den inte har uppgifter om vad tidningen skrev och beskrev mottagandet allmänt |
+| M5 | "Vad tycker läsare om Hotellkuppen av Martin Widmark?" | Godkänt | Korrekt beskrivning av en mindre känd bok: omtyckt av unga läsare och lättläst |
+
+## Slutsatser
+**Påhittade böcker:** med den nuvarande prompten hittade AI:n inte på några böcker. Frågor om påhittade titlar (H1–H4) besvarades med att boken inte är känd, och falska påståenden (H5, H6) rättades. Med den äldre prompten hittade AI:n på både titlar och priser (H8) – reglerna mot påhittade titlar fungerar.
+
+**Kvarstående fel:** AI:n kopplade en bok till fel författare (H7), angav felaktiga översatta titlar och gjorde språkfel, t.ex. tecken från andra alfabet. Vanligast var fel genre: vid smala kombinationer som thriller och lätt nivå valde AI:n hellre kända böcker i närliggande genrer än att hitta på.
+
+**Språk:** kvaliteten var bättre på engelska än på svenska. Originalverk på det valda språket förekom, men blandat med översättningar av kända västerländska böcker – på svenska i thriller och deckare, på kinesiska Drömmar om röda gemak och på arabiska Naguib Mahfouz. Modellen kan alltså litteratur på dessa språk, men föreslår oftare kända västerländska böcker.
+
+**Förslagsknapparna:** knapparna skickar alltid svensk text. På arabiska vägrade AI:n en gång att svara och tolkade knappen som ett försök att byta språk, en annan gång påminde den om arabiska men svarade ändå. På kinesiska fungerade knapparna utan problem. Möjlig förbättring: förslag på det valda språket.
+
+**Mottagande:** AI:n hittade inte på betyg, citat eller vad tidningar skrivit, utan beskrev mottagandet i allmänna drag (M1–M5). Reglerna om att bara beskriva mottagandet allmänt fungerar.
+
+**Begränsningar:** de flesta tester kördes en gång, bedömningen av genre och nivå är delvis subjektiv, och bara gemini-3.5-flash-lite testades på grund av tidsbrist och kostnader. De flesta uppgifter kontrollerades med hjälp av en annan AI, delvis mot källor från Libris och Open Library. Bokdata från ett bok-API skulle göra det möjligt att kontrollera titlar och författare mot riktiga källor.
+

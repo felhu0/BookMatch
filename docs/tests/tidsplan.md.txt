@@ -1,0 +1,112 @@
+Tidsplan
+
+Grundfunktionerna för ej inloggade ska vara klara i slutet av vecka 2; enhetstester skrivs löpande och arbetsloggen förs hela perioden.
+
+Vecka 1 – Research och grund
+• Research om arkitektur, teknik och funktioner, sätt upp GitHub-repo och GitHub Projects
+• Backend – skapa ASP.NET Core-projekt, mappstruktur och testprojekt
+• Säkerhet – API-nyckel i User Secrets, före första AI-anropet
+• Backend – AI-tjänst med IChatClient, första anropet till Gemini via .http-fil
+• Backend – chatt-endpoint för första meddelandet från formuläret, vanligt svar utan streaming
+• Säkerhet – validering med vitlista och maxlängd
+
+Vecka 2 – Frontend, streaming och chatt
+• Frontend – formulär och chattvy i wwwroot (HTML och JavaScript)
+• Backend + frontend – streaming med SSE (Server-Sent Events)
+• Backend + frontend – följdfrågor med historik i webbläsaren
+• Milstolpe – appen fungerar för ej inloggade
+
+Vecka 3 – Konton och säkerhet
+• Backend + frontend – användarkonton med ASP.NET Core Identity, HttpOnly-cookies, CSRF (Cross-Site Request Forgery)-skydd och lockout
+• Säkerhet – rate limiting i två nivåer: ej inloggade per IP, inloggade per användare
+• Backend + frontend – sparad senaste konversation för inloggade, med behörighetskontroll och möjlighet att radera
+• Säkerhet – skydd mot prompt injection (även i historik) och XSS (Cross-Site Scripting)-skydd
+
+Vecka 4 – Tester, design och rapport
+• Tester – attacklista för prompt injection och hallucinationstester, dokumentera resultat
+• Frontend – enkel design med CSS
+• Projektrapport
+• Förbered och genomför redovisning
+
+Prioritering: grundchatten först, sedan konton och säkerhet, därefter tester; designen hålls enkel om tiden inte räcker.
+
+Uppföljning
+
+• Milstolpen nåddes: appen fungerade för ej inloggade i slutet av vecka 2
+• Vecka 3 genomfördes enligt plan, och säkerhetsheaders med CSP (Content Security Policy) lades till
+• Design gjordes redan i vecka 3, eftersom projektet låg före tidsplanen
+• Avvikelse: klickbara förslag på följdfrågor lades till utöver planen
+• Avvikelse: modellen byttes till gemini-3.5-flash-lite när gemini-2.5-flash avvecklades
+• Avvikelse: enhetstester skrevs i vecka 1 för valideringen och samlat i vecka 4 för resten, inte helt löpande som planerat
+• Vecka 4: tester och rapport enligt plan
+
+Dokumentation – BookMatch
+
+Vecka 1 – Grund och AI-koppling
+
+Koppling till Gemini
+Appen är kopplad till Gemini via IChatClient (gemensamt interface), så att AI-leverantören kan bytas utan kodändringar. Modellnamnet ligger i konfigurationen.
+Test: ett testanrop gav ett korrekt boktips.
+
+Chatt-endpoint och validering
+POST /api/chat tar emot språk, genre och läsnivå och returnerar tre boktips. Servern bygger meddelandet till AI:n själv, så användaren kan inte skriva egna instruktioner. All input valideras mot en vitlista med tillåtna språk, genrer och nivåer – ogiltiga anrop får 400 Bad Request.
+Test: prompt injection, ogiltiga värden och saknade fält stoppades. Enhetstester täcker valideringen. Ett svar innehöll en påhittad boktitel, som sparades som testfall för hallucinationer.
+
+Säkerhet: API-nyckeln ligger i User Secrets och hamnar aldrig i Git. Inga interna feldetaljer visas för användaren, och användaren informeras om att Google kan använda meddelanden i gratisnivån.
+
+Vecka 2–3 – Chatt, konton och säkerhet
+
+Streaming och följdfrågor
+Frontend byggdes i wwwroot med HTML och JavaScript. Svaren strömmas ord för ord med SSE. Användaren kan ställa följdfrågor, och historiken skickas med vid varje anrop.
+Test: följdfrågor gav svar i rätt sammanhang och frågor utanför ämnet avböjdes. Två buggar i historiken och en för strikt språkregel hittades och rättades.
+Säkerhet: historiken valideras med tillåtna roller, maxlängd, maxantal och ordning – rollen System kan aldrig skickas från webbläsaren.
+
+Användarkonton
+Konton med ASP.NET Core Identity, SQLite och cookie-baserad inloggning. Alla anrop som ändrar något skyddas mot CSRF (Cross-Site Request Forgery) med antiforgery-token.
+Test: chatt utan CSRF-token gav 400, lockout spärrade kontot efter fem försök och document.cookie gav en tom sträng.
+Säkerhet: hashade lösenord, minst 12 tecken enligt NIST (National Institute of Standards and Technology), cookies med HttpOnly, Secure och SameSite=Strict, och generiska felmeddelanden.
+Tekniskt val: cookies istället för JWT (JSON Web Token), eftersom frontend och backend har samma ursprung och en HttpOnly-cookie inte kan läsas av JavaScript.
+
+Rate limiting i två nivåer
+Rate limiting (begränsning av antal anrop) med ASP.NET Cores inbyggda stöd och glidande fönster:
+
+Ej inloggade: 5 frågor per 15 minuter, per IP-adress
+Inloggade: 20 frågor per 15 minuter, per användare
+Registrering och inloggning: 10 försök per 15 minuter, per IP-adress
+Test: Efter fem frågor blockerades den sjätte frågan för en utloggad användare. Efter tio inloggningsförsök blockerades det elfte försöket. Båda gav HTTP-statuskod 429 (Too Many Requests).
+Upptäckt: servern skickar ingen väntetid (Retry-After), eftersom glidande fönster i .NET inte räknar ut någon – verifierat med brytpunkt. Frontend visar istället att användaren ska vänta en stund.
+
+Sparad senaste konversation
+Inloggade användares senaste konversation sparas och visas automatiskt nästa gång de öppnar appen. De kan även välja att radera konversationen.
+Test: chatten återställdes efter omladdning, och två konton såg bara sina egna konversationer. Tre fel rättades: fel adress, en funktion som aldrig anropades och ett stavfel.
+Säkerhet: användar-id tas från inloggningscookien och inga id:n syns i anrop eller svar (skydd mot IDOR, Insecure Direct Object Reference). Radering kräver CSRF-token, och användaren kan se och radera sin data.
+
+Skydd mot prompt injection
+All logik för meddelandet till AI:n samlades i PromptBuilder: säkerhetsregler, avgränsning av användartext med taggar, neutralisering av < och >, påminnelse om valt språk efter varje fråga och en regel om att historiken kan vara förfalskad.
+Test: en allvarlig bugg hittades – användarens tidigare frågor skickades med rollen System. Den rättades och täcks nu av ett enhetstest.
+
+Säkerhetsheaders och design
+En egen middleware lägger till CSP (Content Security Policy) och andra säkerhetsheaders på alla svar. Appen fick en enkel, responsiv design med mörkt läge.
+Test: XSS (Cross-Site Scripting) via <img onerror> blockerades av CSP, och sidan kunde inte visas i en iframe.
+
+Klickbara förslag – avvikelse från planen
+Under chatten visas knappar med färdiga följdfrågor. De är fasta i HTML och går igenom samma validering och skydd som vanliga frågor. Lades till utöver planen, eftersom projektet låg före tidsplanen.
+
+Vecka 4 – Tester och rapport
+
+Enhetstester
+Enhetstester för validering, PromptBuilder och ConversationService, där den sista testas med SQLite i minnet. Testerna bevisades fånga verkliga fel genom att tillfälligt återinföra kända buggar.
+
+Attacklista och hallucinationstester
+Attacklista med 12 AI-attacker och 16 webbsäkerhetstester, och hallucinationstester med påhittade böcker, boktips på fyra språk och frågor om mottagande. Uppgifterna kontrollerades med hjälp av en annan AI och delvis mot Libris och Open Library.
+
+Resultat:
+Webbsäkerhet: 16 av 16 tester höll
+Prompt injection: 12 av 12 attacker stoppades efter skyddet
+Hallucinationer: inga påhittade böcker, betyg eller citat med nuvarande prompt. Kvarstående fel: fel genre, felaktigt översatta titlar och språkfel
+Språk: bättre på engelska än svenska. På arabiska och kinesiska dominerade västerländska böcker, men originalverk förekom
+Förslagsknapparna skickar svensk text, vilket AI:n på arabiska ibland tolkade som försök att byta språk
+Filer: docs/tests/attacklist.md och docs/tests/hallucinationstests.md
+
+Begränsningar
+De flesta AI-tester kördes ett fåtal gånger, bedömningen av genre och nivå är delvis subjektiv, och bara en AI-modell testades. Registrering kan avslöja om en e-postadress redan har ett konto.
